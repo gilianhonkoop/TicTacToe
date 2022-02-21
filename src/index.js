@@ -2,10 +2,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
+//row x column
 const BOARDIMENSIONS = [3, 3]
-//Row x Column
+
 
 function Square(props) {
+    if(props.highlight) {
+      return (
+        <button className="highlight" onClick={props.onClick}>
+            {props.value}
+        </button>
+      );
+    }
+
     return (
         <button className="square" onClick={props.onClick}>
             {props.value}
@@ -15,15 +24,26 @@ function Square(props) {
   
   class Board extends React.Component {
     renderSquare(i) {
+      var highlight = null;
+      for (let j = 0; j < 3; j++) {
+        var check;
+        if(this.props.winningsquaresarr) {
+          if (i == this.props.winningsquaresarr[j]) {
+            highlight = true;
+          }
+        }
+      }
+
       return (
         <Square 
             value={this.props.squares[i]}
             onClick={() => this.props.onClick(i)}
             key={i}
+            highlight={highlight}
         />
       );
     }
-  
+
     render() {
       const allrows = [];
       for (let i = 0, k = BOARDIMENSIONS[0]; i < k; i++) {
@@ -35,29 +55,10 @@ function Square(props) {
         allrows[i] = React.createElement('div', {className: 'board-row', key: i}, rowsquares);
       }
       
-
-
       return (
         <div>
           {allrows}
         </div>
-        // <div>
-        //   <div className="board-row">
-        //     {this.renderSquare(0)}
-        //     {this.renderSquare(1)}
-        //     {this.renderSquare(2)}
-        //   </div>
-        //   <div className="board-row">
-        //     {this.renderSquare(3)}
-        //     {this.renderSquare(4)}
-        //     {this.renderSquare(5)}
-        //   </div>
-        //   <div className="board-row">
-        //     {this.renderSquare(6)}
-        //     {this.renderSquare(7)}
-        //     {this.renderSquare(8)}
-        //   </div>
-        // </div>
       );
     }
   }
@@ -72,6 +73,7 @@ function Square(props) {
             stepNumber: 0,
             xIsNext: true,
             moveLocation: null,
+            order: 'Asc',
         }
     }
 
@@ -104,9 +106,15 @@ function Square(props) {
     render() {
       const history = this.state.history;
       const current = history[this.state.stepNumber];
-      const winner = calculateWinner(current.squares);
+      var winner = calculateWinner(current.squares);
+      var winningsquares;
+      
+      if(winner && winner != 'draw') {
+        winningsquares = winner[1];
+        winner = winner[0];
+      }
 
-      const moves = history.map((step, move) => {
+      var moves = history.map((step, move) => {
           const templocation = history[move];
           const location = templocation.moveLocation;
           const desc = move ?
@@ -122,14 +130,37 @@ function Square(props) {
           );
       });
 
+      var movesordered = moves;
+
+      if (this.state.order === 'Desc') {
+        var movesordered = moves.slice(0).reverse();
+      }
+
       let status;
-      if (winner) { 
+      if (winner && winner !== 'draw') { 
         status = 'Winner: ' + winner;
-      } else {
+      } 
+      else if (winner == 'draw') {
+        status = 'The game has ended in a draw!'
+      } 
+      else {
           status =
           'Next player: ' +
           (this.state.xIsNext ? 'X' : 'O');
       }
+
+      const toggle = (
+        <ul>
+          <button onClick={() => {
+            this.state.order === 'Asc' ? this.setState({order: 'Desc'}) : this.setState({order: 'Asc'});
+          }}>
+            <span>Toggle order </span>
+            <span style={this.state.order === 'Asc' ? {fontWeight: '600'} : {fontWeight: '300'}}>Asc</span>
+            /
+            <span style={this.state.order === 'Desc' ? {fontWeight: '600'} : {fontWeight: '300'}}>Desc</span>
+          </button>
+        </ul>
+      );
 
       return (
         <div className="game">
@@ -137,11 +168,13 @@ function Square(props) {
             <Board
                 squares={current.squares}
                 onClick={(i) => this.handleClick(i)} 
+                winningsquaresarr={winningsquares}
             />
           </div>
           <div className="game-info">
             <div>{status}</div>
-            <ol>{moves}</ol>
+            <div>{toggle}</div>
+            <ol>{movesordered}</ol>
           </div>
         </div>
       );
@@ -159,13 +192,21 @@ function Square(props) {
       [0, 4, 8],
       [2, 4, 6],
     ];
+    var result = 'draw';
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
+        return [squares[a], lines[i]];
       }
     }
-    return null;
+
+    for (let i = 0; i < Object.keys(squares).length; i++) {
+      if (Object.entries(squares)[i][1] == null) {
+        result = null;
+      }
+    }
+
+    return result;
   }
   // ========================================
   
