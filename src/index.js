@@ -26,9 +26,8 @@ function Square(props) {
     renderSquare(i) {
       var highlight = null;
       for (let j = 0; j < 3; j++) {
-        var check;
         if(this.props.winningsquaresarr) {
-          if (i == this.props.winningsquaresarr[j]) {
+          if (i === this.props.winningsquaresarr[j]) {
             highlight = true;
           }
         }
@@ -109,7 +108,7 @@ function Square(props) {
       var winner = calculateWinner(current.squares);
       var winningsquares;
       
-      if(winner && winner != 'draw') {
+      if(winner && winner !== 'draw') {
         winningsquares = winner[1];
         winner = winner[0];
       }
@@ -133,15 +132,15 @@ function Square(props) {
       var movesordered = moves;
 
       if (this.state.order === 'Desc') {
-        var movesordered = moves.slice(0).reverse();
+        movesordered = moves.slice(0).reverse();
       }
 
       let status;
       if (winner && winner !== 'draw') { 
         status = 'Winner: ' + winner;
       } 
-      else if (winner == 'draw') {
-        status = 'The game has ended in a draw!'
+      else if (winner === 'draw') {
+        status = 'The game has ended in a draw!';
       } 
       else {
           status =
