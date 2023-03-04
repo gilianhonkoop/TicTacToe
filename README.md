@@ -1,6 +1,6 @@
 # Tic Tac Toe with Create React App
 
-Followed the intro to react tutorial: https://reactjs.org/tutorial/tutorial.html
+Followed the intro to react tutorial: https://reactjs.org/tutorial/tutorial.html \
 Implemented 6 suggested additional features.
 
 ## Available Scripts
